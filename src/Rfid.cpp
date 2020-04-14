@@ -1,12 +1,22 @@
 #include "hal_rfid/Rfid.h"
 
+#define CMD_SyncGetEPCs 0x0101
+#define RES_SyncGetEPCs 0x8101
+#define RF_NoError 0x00
+#define RF_NoTag 0x0a
+#define RF_NoStandard 0x05
+#define RF_WrongCommandFunctionMode 0x0E
+
+#define FRAME_SIZE_BYTE 2
+#define FRAME_ID_BYTE 6
+#define FRAME_DATA_START 8
+
+#define FRAME_START 0x5a50
+#define FRAME_END 0xa5
+
 #define BUFF_SIZE 50
 #define BYTE_MASK 0xff
 
-#define FRAME_SIZE_BYTE 0x02
-#define FRAME_ID_BYTE 0x06
-#define FRAME_START 0x5a50
-#define FRAME_END 0xa5
 
 RFID::RFID(char* sIpAddr, int iPort)
 {
@@ -65,8 +75,35 @@ void RFID::vParseFrame(char* pchMsg)
             break;
         }
     }
+
     uint32_t u32MsgSize = u32GetU32(FRAME_SIZE_BYTE, pchMsg);
     uint16_t u16MsgId = u16GetU16(FRAME_ID_BYTE, pchMsg);
+
+    for(uint8_t i = FRAME_DATA_START; i < u8FrameSize-2;)
+    {
+        if(pchMsg[i] == RF_NoError)
+        {
+            i+=3;
+            uint8_t u32NumberOfEPCWords =  pchMsg[i];
+            i+=1;
+            for (uint8_t j = 1; j <= u32NumberOfEPCWords; j++)
+            {
+                _vDiscoveredTags.push_back(u16GetU16(i, pchMsg));
+                std::cout << "Pushing back: " << std::hex << std:: endl;
+                i+=2;
+            }
+            i+=1;
+        }
+        if(pchMsg[i] == RF_NoTag)
+        {
+            _vDiscoveredTags.clear();
+            i+=3;
+        }
+        if(pchMsg[i] == FRAME_END)
+        {
+            return;
+        }
+    }
     
     std::cout << std::hex << u32MsgSize << " " << u16MsgId << std:: endl;
 }
@@ -79,7 +116,7 @@ bool RFID::bScanForTags()
     pchMessage[0] = (FRAME_START&0xff00)>>8;
     pchMessage[1] = (FRAME_START&BYTE_MASK);
     // size - value in bytes (described by 4 bytes, LSB first)
-    uint32_t u32MsgSize = 0x00000002;
+    uint32_t u32MsgSize = 2;
     pchMessage[2] = (u32MsgSize&0xff);
     pchMessage[3] = (u32MsgSize&0xff00)>>8;
     pchMessage[4] = (u32MsgSize&0xff0000)>>16;
@@ -94,7 +131,7 @@ bool RFID::bScanForTags()
     vParseFrame(pchMessage);
 }
 
-std::vector<std::string> RFID::vGetIDs()
+std::vector<uint16_t> RFID::vGetIDs()
 {
     return _vDiscoveredTags;
 }

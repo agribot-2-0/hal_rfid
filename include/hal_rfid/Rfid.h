@@ -11,14 +11,11 @@
 
 #include <vector>
 
-#define CMD_SyncGetEPCs 0x0101
-#define RES_SyncGetEPCs 0x8101
-
 class RFID
 {
 private:
     int _iSocketFd;
-    std::vector <std::string>_vDiscoveredTags;
+    std::vector <std::uint16_t>_vDiscoveredTags;
 public:
     RFID(char* sIpAddr, int iPort);
     void pchSendFrame(char* pchBuff, uint8_t u8BuffSize);
@@ -27,6 +24,6 @@ public:
     uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
     void vParseFrame(char* pchMsg);
     bool bScanForTags();
-    std::vector<std::string> vGetIDs();
+    std::vector<uint16_t> vGetIDs();
     ~RFID();
 };
