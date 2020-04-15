@@ -1,3 +1,2 @@
-bool get_ids
 ---
-string[] ids
+uint16[] ids

@@ -5,7 +5,7 @@
 #define RF_NoError 0x00
 #define RF_NoTag 0x0a
 #define RF_NoStandard 0x05
-#define RF_WrongCommandFunctionMode 0x0E
+#define RF_WrongCommandFunctionMode 0x0e
 
 #define FRAME_SIZE_BYTE 2
 #define FRAME_ID_BYTE 6
@@ -63,12 +63,11 @@ uint16_t RFID::u16GetU16(uint8_t u8StartBit, char* pchMsg)
     | ((uint16_t)pchMsg[u8StartBit]);
 }
 
-void RFID::vParseFrame(char* pchMsg)
+void RFID::vParseFrame(char* pchMsg, std::vector <std::uint16_t>& vDiscoveredTags)
 {
     uint8_t u8FrameSize = 0;
     for (u8FrameSize = 0; u8FrameSize < BUFF_SIZE; u8FrameSize++)
     {
-        pchMsg[u8FrameSize] = (uint)pchMsg[u8FrameSize]&BYTE_MASK;
         std::cout << std::hex << (((uint)pchMsg[u8FrameSize]&BYTE_MASK)) << std:: endl;
         if((pchMsg[u8FrameSize]&BYTE_MASK) == FRAME_END)
         {
@@ -76,39 +75,38 @@ void RFID::vParseFrame(char* pchMsg)
         }
     }
 
-    uint32_t u32MsgSize = u32GetU32(FRAME_SIZE_BYTE, pchMsg);
-    uint16_t u16MsgId = u16GetU16(FRAME_ID_BYTE, pchMsg);
-
-    for(uint8_t i = FRAME_DATA_START; i < u8FrameSize-2;)
+    if(u16GetU16(FRAME_ID_BYTE, pchMsg) == RES_SyncGetEPCs)
     {
-        if(pchMsg[i] == RF_NoError)
+        for(uint8_t i = FRAME_DATA_START;;)
         {
-            i+=3;
-            uint8_t u32NumberOfEPCWords =  pchMsg[i];
-            i+=1;
-            for (uint8_t j = 1; j <= u32NumberOfEPCWords; j++)
+            if((pchMsg[i]&BYTE_MASK) == RF_NoError)
             {
-                _vDiscoveredTags.push_back(u16GetU16(i, pchMsg));
-                std::cout << "Pushing back: " << std::hex << std:: endl;
                 i+=2;
+                uint8_t u8NumberOfEPCWords = (pchMsg[i]&BYTE_MASK);
+                i++;
+                for (uint8_t j = u8NumberOfEPCWords; j > 0 ; j--)
+                {
+                    vDiscoveredTags.push_back(u16GetU16(i, pchMsg));
+                    std::cout << "Pushing back: " << std::hex << (uint)u16GetU16(i, pchMsg) << std:: endl;
+                    i+=2;
+                }
             }
-            i+=1;
-        }
-        if(pchMsg[i] == RF_NoTag)
-        {
-            _vDiscoveredTags.clear();
-            i+=3;
-        }
-        if(pchMsg[i] == FRAME_END)
-        {
-            return;
+            if((pchMsg[i]&BYTE_MASK) == RF_NoTag)
+            {
+                vDiscoveredTags.clear();
+                std::cout << "No tags found!" << std:: endl;
+                i+=1;
+            }
+            if((pchMsg[i]&BYTE_MASK) == FRAME_END)
+            {
+                return;
+            }
         }
     }
-    
-    std::cout << std::hex << u32MsgSize << " " << u16MsgId << std:: endl;
 }
 
-bool RFID::bScanForTags()
+// true if new tags
+void RFID::vScanForTags(std::vector <std::uint16_t>& vDiscoveredTags)
 {
     char pchMessage[BUFF_SIZE];
     bzero(pchMessage, (sizeof(char)*BUFF_SIZE));
@@ -128,12 +126,8 @@ bool RFID::bScanForTags()
     pchMessage[8] = FRAME_END;
     pchSendFrame(pchMessage, 9);
     pchRecFrame(pchMessage, BUFF_SIZE);
-    vParseFrame(pchMessage);
-}
-
-std::vector<uint16_t> RFID::vGetIDs()
-{
-    return _vDiscoveredTags;
+    vParseFrame(pchMessage, vDiscoveredTags);
+    return;
 }
 
 RFID::~RFID()
