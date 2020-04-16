@@ -1,9 +1,10 @@
 #include "hal_rfid/Rfid.h"
 
 #define CMD_SyncGetEPCs 0x0101
+#define CMD_SetPortPower 0x0006
 #define RES_SyncGetEPCs 0x8101
+#define RES_SetPortPower 0x8006
 //SyncWriteEPCSpecyfic
-//SetPortPower(PORT (1,2,3,4), POWER (0-128) eg.108)
 
 #define RF_NoError 0x00
 #define RF_NoTag 0x0a
@@ -20,6 +21,11 @@
 #define BUFF_SIZE 50
 #define BYTE_MASK 0xff
 
+#define MIN_POWER_DBM 17 //dBm
+#define MAX_POWER_DBM 33 //dBm
+#define MIN_POWER_HEX 0x44
+#define MAX_POWER_HEX 0x84
+#define RESOLUTION 0.25
 
 RFID::RFID(char* sIpAddr, int iPort)
 {
@@ -80,6 +86,7 @@ void RFID::vParseFrame(char* pchMsg, std::vector<std::uint16_t>& vDiscoveredTags
         }
     }
 
+    // Tags EPC frame:
     if(u16GetU16(FRAME_ID_BYTE, pchMsg) == RES_SyncGetEPCs)
     {
         uint8_t u8MsgIt = FRAME_DATA_START;
@@ -113,7 +120,43 @@ void RFID::vParseFrame(char* pchMsg, std::vector<std::uint16_t>& vDiscoveredTags
     return;
 }
 
-// true if new tags
+uint8_t RFID::u8CalculatePowerVal(float fPV)
+{
+    uint8_t u8Val = 0;
+    if((fPV <= MAX_POWER_DBM) && (fPV >= MIN_POWER_DBM))
+    {
+        u8Val = MIN_POWER_HEX + ((uint8_t)fPV- MIN_POWER_DBM)/RESOLUTION;
+    }
+    return u8Val;
+}
+
+// True if everything went well
+bool RFID::bSetAntennasPower(uint8_t u8Port, float fPowerValue)
+{
+    uint8_t u8PowerVal = u8CalculatePowerVal(fPowerValue);
+    char pchMessage[BUFF_SIZE];
+    bzero(pchMessage, (sizeof(char)*BUFF_SIZE));
+    // start of frame:
+    pchMessage[0] = (FRAME_START&0xff00)>>8;
+    pchMessage[1] = (FRAME_START&BYTE_MASK);
+    // size - value in bytes (described by 4 bytes, LSB first)
+    uint32_t u32MsgSize = 4;
+    pchMessage[2] = (u32MsgSize&0xff);
+    pchMessage[3] = (u32MsgSize&0xff00)>>8;
+    pchMessage[4] = (u32MsgSize&0xff0000)>>16;
+    pchMessage[5] = (u32MsgSize&0xff000000)>>24;
+    // command id (LSB first):
+    pchMessage[6] = CMD_SetPortPower&0x00ff;
+    pchMessage[7] = (CMD_SetPortPower&0xff00)>>8;
+    pchMessage[8] = u8Port;
+    pchMessage[9] = u8PowerVal;
+    // frame end:
+    pchMessage[10] = FRAME_END;
+    pchSendFrame(pchMessage, 11);
+    // TODO: check response frame, and return false in case of errors
+    return true;
+}
+
 void RFID::vScanForTags(std::vector<std::uint16_t>& vDiscoveredTags)
 {
     char pchMessage[BUFF_SIZE];

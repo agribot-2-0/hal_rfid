@@ -10,6 +10,18 @@ RFID test(RFID_IP, PORT);
 bool bScan(hal_rfid::Tags::Request &req,
            hal_rfid::Tags::Response &res)
 {
+    if (req.selected_antenna == req.FRONT)
+    {
+        std::cout << "FRONT" << std::endl;
+        test.bSetAntennasPower(1, 25);
+        test.bSetAntennasPower(2, 0);
+    }
+    if (req.selected_antenna == req.BACK)
+    {
+        std::cout << "BACK" << std::endl;
+        test.bSetAntennasPower(1, 0);
+        test.bSetAntennasPower(2, 25);
+    }
     test.vScanForTags(res.ids);
     return true;
 }

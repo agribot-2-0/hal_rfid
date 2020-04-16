@@ -8,6 +8,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include <math.h>
 
 #include <vector>
 
@@ -22,6 +23,11 @@ public:
     uint32_t u32GetU32(uint8_t u8StartBit, char* pchMsg);
     uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
     void vParseFrame(char* pchMsg, std::vector <std::uint16_t>& vDiscoveredTags);
+    uint8_t u8CalculatePowerVal(float fPV);
+    // PowerValue: 17dBm-33dBm (with 1/4dBm resolution), 
+    // (default value: 25dBm -> 107) 
+    // Port: 1-4
+    bool bSetAntennasPower(uint8_t u8Port, float fPowerValue);
     void vScanForTags(std::vector <std::uint16_t>& vDiscoveredTags);
     ~RFID();
 };

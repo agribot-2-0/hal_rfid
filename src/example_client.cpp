@@ -9,6 +9,8 @@ int main(int argc, char** argv)
     ros::ServiceClient client = 
         n.serviceClient<hal_rfid::Tags>("hal_rfid/tags");
     hal_rfid::Tags test2;
+    test2.request.selected_antenna = test2.request.FRONT;
+
     if(client.call(test2))
     {
         std::cout << "Found " << test2.response.ids.size() << " tags:" << std:: endl;
@@ -22,5 +24,6 @@ int main(int argc, char** argv)
     {
         std::cout << "ERROR" << std:: endl;
     }
+
     return 0;
 }
