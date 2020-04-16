@@ -14,7 +14,7 @@ int main(int argc, char** argv)
         std::cout << "Found " << test2.response.ids.size() << " tags:" << std:: endl;
         while(!test2.response.ids.empty())
         {
-            std::cout << test2.response.ids.front() << std::endl;
+            std::cout << std::hex << test2.response.ids.back() << std::endl;
             test2.response.ids.pop_back();
         }
     }
