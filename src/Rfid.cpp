@@ -47,12 +47,12 @@ RFID::RFID(char* sIpAddr, int iPort)
     }
 }
 
-void RFID::pchSendFrame(char* pchBuff, uint8_t u8BuffSize) 
+void RFID::vSendFrame(char* pchBuff, uint8_t u8BuffSize) 
 {
     write(_iSocketFd, pchBuff, (sizeof(char)*u8BuffSize));
 }
 
-void RFID::pchRecFrame(char* pchBuff, uint8_t u8BuffSize)
+void RFID::vRecFrame(char* pchBuff, uint8_t u8BuffSize)
 {
     bzero(pchBuff, (sizeof(char)*u8BuffSize));
     read(_iSocketFd, pchBuff, (sizeof(char)*u8BuffSize));
@@ -72,7 +72,7 @@ uint16_t RFID::u16GetU16(uint8_t u8StartBit, char* pchMsg)
     | ((uint16_t)pchMsg[u8StartBit]);
 }
 
-void RFID::vParseFrame(char* pchMsg, std::vector<std::uint16_t>& vDiscoveredTags)
+void RFID::vParseEPCFrame(char* pchMsg, std::vector<std::uint16_t>& vDiscoveredTags)
 {
     vDiscoveredTags.clear();
 
@@ -131,7 +131,7 @@ uint8_t RFID::u8CalculatePowerVal(float fPV)
 }
 
 // True if everything went well
-bool RFID::bSetAntennasPower(uint8_t u8Port, float fPowerValue)
+bool RFID::bSetAntennaPower(uint8_t u8Port, float fPowerValue)
 {
     uint8_t u8PowerVal = u8CalculatePowerVal(fPowerValue);
     char pchMessage[BUFF_SIZE];
@@ -152,7 +152,8 @@ bool RFID::bSetAntennasPower(uint8_t u8Port, float fPowerValue)
     pchMessage[9] = u8PowerVal;
     // frame end:
     pchMessage[10] = FRAME_END;
-    pchSendFrame(pchMessage, 11);
+    vSendFrame(pchMessage, 11);
+    vRecFrame(pchMessage, BUFF_SIZE);
     // TODO: check response frame, and return false in case of errors
     return true;
 }
@@ -175,9 +176,9 @@ void RFID::vScanForTags(std::vector<std::uint16_t>& vDiscoveredTags)
     pchMessage[7] = (CMD_SyncGetEPCs&0xff00)>>8;
     // frame end:
     pchMessage[8] = FRAME_END;
-    pchSendFrame(pchMessage, 9);
-    pchRecFrame(pchMessage, BUFF_SIZE);
-    vParseFrame(pchMessage, vDiscoveredTags);
+    vSendFrame(pchMessage, 9);
+    vRecFrame(pchMessage, BUFF_SIZE);
+    vParseEPCFrame(pchMessage, vDiscoveredTags);
     return;
 }
 

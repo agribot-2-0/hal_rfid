@@ -13,14 +13,20 @@ bool bScan(hal_rfid::Tags::Request &req,
     if (req.selected_antenna == req.FRONT)
     {
         std::cout << "FRONT" << std::endl;
-        test.bSetAntennasPower(1, 25);
-        test.bSetAntennasPower(2, 0);
+        if ((test.bSetAntennaPower(1, 25) != true) || 
+            (test.bSetAntennaPower(2, 0) != true))
+        {
+            ROS_ERROR("[RFID] Antenna Configuration failed");
+        }
     }
     if (req.selected_antenna == req.BACK)
     {
         std::cout << "BACK" << std::endl;
-        test.bSetAntennasPower(1, 0);
-        test.bSetAntennasPower(2, 25);
+        if ((test.bSetAntennaPower(1, 25) != true) || 
+            (test.bSetAntennaPower(2, 0) != true))
+        {
+            ROS_ERROR("[RFID] Antenna Configuration failed");
+        }
     }
     test.vScanForTags(res.ids);
     return true;
