@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <hal_rfid/RfidMessage.h>
 
 #include <vector>
 
@@ -22,12 +23,15 @@ public:
     void vRecFrame(char* pchBuff, uint8_t u8BuffSize);
     uint32_t u32GetU32(uint8_t u8StartBit, char* pchMsg);
     uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
-    void vParseEPCFrame(char* pchMsg, std::vector <std::uint16_t>& vDiscoveredTags);
+    bool bParseGetEPCResp(char* pchMsg, std::vector <std::uint16_t>& vDiscoveredTags);
+    bool bParseSetPowerResp(char* pchMsg);
+    bool bParseWriteEPCResp(char* pchMsg);
     uint8_t u8CalculatePowerVal(float fPV);
-    // PowerValue: 17dBm-33dBm (with 1/4dBm resolution), 
-    // (default value: 25dBm -> 107) 
+    // fPowerValue: 17dBm-33dBm (with 1/4dBm resolution), 
+    // (default value: 25dBm) 
     // Port: 1-4
     bool bSetAntennaPower(uint8_t u8Port, float fPowerValue);
-    void vScanForTags(std::vector <std::uint16_t>& vDiscoveredTags);
+    bool bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password);
+    bool bScanForTags(std::vector <std::uint16_t>& vDiscoveredTags);
     ~RFID();
 };

@@ -45,7 +45,7 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 link_directories("${PROJECT_SOURCE_DIR}")
-add_executable(hal_rfid_node src/Rfid.cpp src/rfid_node.cpp)
+add_executable(hal_rfid_node src/Rfid.cpp src/RfidMessage.cpp src/rfid_node.cpp)
 target_link_libraries(hal_rfid_node ${catkin_LIBRARIES})
 add_dependencies(hal_rfid_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
