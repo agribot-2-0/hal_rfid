@@ -5,7 +5,7 @@
 #define PORT 4007
 #define RFID_IP "192.168.0.2"
 
-#define DEFAULT_ANTENAT_PWR 25 //dBm
+#define DEFAULT_ANTENAT_PWR 23 //dBm
 
 RFID RfidHandler(RFID_IP, PORT);
 
@@ -22,8 +22,8 @@ bool bScan(hal_rfid::Tags::Request &req,
     }
     if (req.selected_antenna == req.BACK)
     {
-        if ((RfidHandler.bSetAntennaPower(1, DEFAULT_ANTENAT_PWR) != true) ||
-            (RfidHandler.bSetAntennaPower(2, 0) != true))
+        if ((RfidHandler.bSetAntennaPower(1, 0) != true) ||
+            (RfidHandler.bSetAntennaPower(2, DEFAULT_ANTENAT_PWR) != true))
         {
             ROS_ERROR("[RFID] Antenna Configuration failed");
         }
@@ -37,8 +37,8 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::ServiceServer Service = 
         n.advertiseService("hal_rfid/tags", bScan);
-    // Example of writin new EPC to tag:
-    // RfidHandler.bWriteTagEPC(0x1234, 0);
+    // [Example] Writin new EPC to tag:
+    //RfidHandler.bWriteTagEPC(0x1234, 0);
     ros::spin();
     return 0;
 }
