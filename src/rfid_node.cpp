@@ -5,7 +5,7 @@
 #define PORT 4007
 #define RFID_IP "192.168.0.2"
 
-#define DEFAULT_ANTENAT_PWR 23 //dBm
+#define DEFAULT_ANTENAT_PWR 23  // dBm
 
 RFID RfidHandler(RFID_IP, PORT);
 
@@ -35,13 +35,13 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "rfid");
     ros::NodeHandle n;
-    ros::ServiceServer Service = 
+    ros::ServiceServer Service =
         n.advertiseService("hal_rfid/tags", bScan);
     // [Example] Writin new EPC to tag:
-    if(!RfidHandler.bWriteTagEPC(0x123a, 0))
-    {
-        ROS_ERROR("[RFID] Write EPC failed (probably no tags found)");
-    }
+    // if(!RfidHandler.bWriteTagEPC(0x123a, 0))
+    // {
+    //     ROS_ERROR("[RFID] Write EPC failed (probably no tags found)");
+    // }
     ros::spin();
     return 0;
 }

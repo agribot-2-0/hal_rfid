@@ -23,8 +23,9 @@ uint8_t RfidMessage::u8PrintFrame()
     uint8_t u8FrameSize;
     for (u8FrameSize = 0; u8FrameSize < 40; u8FrameSize++)
     {
-        std::cout << std::hex << (((uint)_pchBuffer[u8FrameSize]&BYTE_MASK)) << std:: endl;
-        if((_pchBuffer[u8FrameSize]&BYTE_MASK) == FRAME_END)
+        std::cout << std::hex << (((uint)_pchBuffer[u8FrameSize]&BYTE_MASK));
+        std::cout << std:: endl;
+        if ((_pchBuffer[u8FrameSize]&BYTE_MASK) == FRAME_END)
         {
             break;
         }
@@ -54,7 +55,7 @@ void RfidMessage::vSetFrameId(uint16_t u16Id)
 
 void RfidMessage::vSetFrameData(uint8_t* pu8Data, uint8_t u8DataLength)
 {
-    for(uint8_t i = 0;i < u8DataLength; i++)
+    for (uint8_t i = 0; i < u8DataLength; i++)
     {
         _pchBuffer[_u16FrameIt] = pu8Data[i];
         _u16FrameIt++;
@@ -103,7 +104,7 @@ uint16_t RfidMessage::u16GetU16(uint8_t u8StartBit, char* pchMsg)
 
 bool RfidMessage::bCheckSetPowerResp(uint8_t u8Port)
 {
-    if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SetPortPower)
+    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SetPortPower)
     {
         if ((_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError) &&
             (_pchBuffer[FRAME_DATA_START_BYTE+1] == u8Port))
@@ -116,10 +117,9 @@ bool RfidMessage::bCheckSetPowerResp(uint8_t u8Port)
 
 bool RfidMessage::bCheckWriteEPCResp()
 {
-    if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncWriteEPCToSingleTag)
+    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncWriteEPCToSingleTag)
     {
-        u8PrintFrame();
-        if(_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError)
+        if (_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError)
         {
             return true;
         }
@@ -131,22 +131,22 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
 {
     vDiscoveredTags.clear();
     // Tags EPC frame:
-    if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
+    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
     {
         uint8_t u8MsgIt = FRAME_DATA_START_BYTE;
-        while(true)
+        while (true)
         {
-            if((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoTag)
+            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoTag)
             {
                 return true;
             }
-            if((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoError)
+            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoError)
             {
-                while(true)
+                while (true)
                 {
                     u8MsgIt += 4;
-                    if(((_pchBuffer[u8MsgIt-2]&BYTE_MASK) == FRAME_END) ||
-                        (u8MsgIt >= _u16BufferSize))
+                    if (((_pchBuffer[u8MsgIt-2]&BYTE_MASK) == FRAME_END) ||
+                         (u8MsgIt >= _u16BufferSize))
                        {
                            break;
                        }
@@ -154,8 +154,8 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
                 }
                 return true;
             }
-            if((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoStandard |
-               (_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_WrongCommandFunctionMode)
+            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoStandard |
+                (_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_WrongCommandFunctionMode)
             {
                 return false;;
             }

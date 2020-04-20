@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <math.h>
-
+#include <iostream>
+#include <cmath>
 #include <vector>
+#include <cstdio>
+#include <cstdlib>
 
 // Msgs IDs:
 #define CMD_SyncGetEPCs 0x0101
@@ -25,12 +24,12 @@
 
 class RfidMessage
 {
-private:
+ private:
     char* _pchBuffer;
     uint16_t _u16FrameIt;
     uint16_t _u16BufferSize;
-public:
-    RfidMessage(uint16_t u16FrameSize);
+ public:
+    explicit RfidMessage(uint16_t u16FrameSize);
     uint8_t u8PrintFrame();
     void vSetFrameStart();
     // u32MsgSize - In bytes (id size + data size)
