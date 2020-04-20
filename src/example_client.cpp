@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     ros::ServiceClient client = 
         n.serviceClient<hal_rfid::Tags>("hal_rfid/tags");
     hal_rfid::Tags test2;
-    test2.request.selected_antenna = test2.request.FRONT;
+    test2.request.selected_antenna = test2.request.BACK;
 
     if(client.call(test2))
     {

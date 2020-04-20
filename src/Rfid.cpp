@@ -1,5 +1,13 @@
 #include "hal_rfid/Rfid.h"
 
+// Antenna power set constants:
+#define MIN_POWER_DBM 17 //dBm
+#define MAX_POWER_DBM 33 //dBm
+#define MIN_POWER_HEX 0x44
+#define MAX_POWER_HEX 0x84
+#define RESOLUTION 0.25
+
+#define BUFF_SIZE 50
 
 RFID::RFID(char* sIpAddr, int iPort)
 {
@@ -36,26 +44,18 @@ bool RFID::bSetAntennaPower(uint8_t u8Port, float fPowerValue)
 {
     uint8_t u8PowerVal = u8CalculatePowerVal(fPowerValue);
     RfidMessage xMsg(BUFF_SIZE);
-    xMsg.vSetFrameStart();
-    xMsg.vSetFrameLen(4);
-    xMsg.vSetFrameId(CMD_SetPortPower);
     uint8_t pu8Data[2] = {u8Port, u8PowerVal};
-    xMsg.vSetFrameData(pu8Data, 2);
-    xMsg.vSetFrameEnd();
+    xMsg.vMakeRfidFrame(CMD_SetPortPower, pu8Data, 2);
     xMsg.vSendFrame(_iSocketFd);
     xMsg.vRecFrame(_iSocketFd);
     // TODO: check response frame, and return false in case of errors
-    return xMsg.bParseSetPowerResp();
+    return xMsg.bCheckSetPowerResp(u8Port);
 }
 
 // True if everything went well
 bool RFID::bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password)
 {
-
     RfidMessage xMsg(BUFF_SIZE);
-    xMsg.vSetFrameStart();
-    xMsg.vSetFrameLen(9);
-    xMsg.vSetFrameId(CMD_SyncWriteEPCToSingleTag);
     uint8_t pu8Data[7];
     // 4 bytes of access password:
     pu8Data[0] = (u32Password&0xff);
@@ -67,24 +67,21 @@ bool RFID::bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password)
     // new EPC:
     pu8Data[5] = (u16NewEPC&0xff);
     pu8Data[6] = (u16NewEPC&0xff00)>>8;
-    xMsg.vSetFrameData(pu8Data, 7);
-    xMsg.vSetFrameEnd();
+    xMsg.vMakeRfidFrame(CMD_SyncWriteEPCToSingleTag, pu8Data, 7);
     xMsg.vSendFrame(_iSocketFd);
     xMsg.vRecFrame(_iSocketFd);
     // TODO: check response frame, and return
-    return xMsg.bParseWriteEPCResp();
+    return xMsg.bCheckWriteEPCResp();
 }
 
 bool RFID::bScanForTags(std::vector<std::uint16_t>& vDiscoveredTags)
 {
     RfidMessage xMsg(BUFF_SIZE);
-    xMsg.vSetFrameStart();
-    xMsg.vSetFrameLen(2);
-    xMsg.vSetFrameId(CMD_SyncGetEPCs);
-    xMsg.vSetFrameEnd();
+    uint8_t pu8Data[0];
+    xMsg.vMakeRfidFrame(CMD_SyncGetEPCs, pu8Data, 0);
     xMsg.vSendFrame(_iSocketFd);
     xMsg.vRecFrame(_iSocketFd);
-    return xMsg.bParseGetEPCResp(vDiscoveredTags);
+    return xMsg.bCheckGetEPCResp(vDiscoveredTags);
 }
 
 RFID::~RFID()

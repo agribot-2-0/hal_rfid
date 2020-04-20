@@ -1,12 +1,21 @@
 #include <hal_rfid/RfidMessage.h>
 
+#define FRAME_SIZE_BYTE 2
+#define FRAME_ID_BYTE 6
+#define FRAME_DATA_START_BYTE 8
+#define ID_LEN 2
+
+#define FRAME_START 0x5a50
+#define FRAME_END 0xa5
+
+#define BYTE_MASK 0xff
 
 RfidMessage::RfidMessage(uint16_t u16BuffSize)
 {
     _u16BufferSize = u16BuffSize;
     _pchBuffer = new char[_u16BufferSize];
     bzero(_pchBuffer, (sizeof(char)*_u16BufferSize));
-    _u16FrameIt = FRAME_DATA_START;
+    _u16FrameIt = FRAME_DATA_START_BYTE;
 }
 
 uint8_t RfidMessage::u8PrintFrame()
@@ -57,6 +66,16 @@ void RfidMessage::vSetFrameEnd()
     _pchBuffer[_u16FrameIt] = FRAME_END;
 }
 
+void RfidMessage::vMakeRfidFrame(uint16_t u16Id, uint8_t* pu8Data,
+                                 uint8_t u8DataLength)
+{
+    vSetFrameStart();
+    vSetFrameLen(u8DataLength+ID_LEN);
+    vSetFrameId(u16Id);
+    vSetFrameData(pu8Data, u8DataLength);
+    vSetFrameEnd();
+}
+
 void RfidMessage::vSendFrame(int iSocketFd)
 {
     write(iSocketFd, _pchBuffer, (sizeof(char)*(_u16FrameIt+1)));
@@ -82,25 +101,39 @@ uint16_t RfidMessage::u16GetU16(uint8_t u8StartBit, char* pchMsg)
     | ((uint16_t)pchMsg[u8StartBit])&BYTE_MASK;
 }
 
-bool RfidMessage::bParseSetPowerResp()
+bool RfidMessage::bCheckSetPowerResp(uint8_t u8Port)
 {
-
-    return true;
+    if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SetPortPower)
+    {
+        if ((_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError) &&
+            (_pchBuffer[FRAME_DATA_START_BYTE+1] == u8Port))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
-bool RfidMessage::bParseWriteEPCResp()
+bool RfidMessage::bCheckWriteEPCResp()
 {
-
-    return true;
+    if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncWriteEPCToSingleTag)
+    {
+        u8PrintFrame();
+        if(_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
-bool RfidMessage::bParseGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
+bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
 {
     vDiscoveredTags.clear();
     // Tags EPC frame:
     if(u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
     {
-        uint8_t u8MsgIt = FRAME_DATA_START;
+        uint8_t u8MsgIt = FRAME_DATA_START_BYTE;
         while(true)
         {
             if((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoTag)
@@ -111,9 +144,9 @@ bool RfidMessage::bParseGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
             {
                 while(true)
                 {
-                    u8MsgIt+=4;
+                    u8MsgIt += 4;
                     if(((_pchBuffer[u8MsgIt-2]&BYTE_MASK) == FRAME_END) ||
-                        (u8MsgIt >= BUFF_SIZE))
+                        (u8MsgIt >= _u16BufferSize))
                        {
                            break;
                        }
@@ -128,16 +161,6 @@ bool RfidMessage::bParseGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
             }
         }
     }
-}
-
-char* RfidMessage::pchGetFrame()
-{
-    return _pchBuffer;
-}
-
-uint16_t RfidMessage::u16GetMsgLen()
-{
-    return _u16FrameIt+1;
 }
 
 RfidMessage::~RfidMessage()

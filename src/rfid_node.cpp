@@ -38,7 +38,10 @@ int main(int argc, char **argv)
     ros::ServiceServer Service = 
         n.advertiseService("hal_rfid/tags", bScan);
     // [Example] Writin new EPC to tag:
-    //RfidHandler.bWriteTagEPC(0x1234, 0);
+    if(!RfidHandler.bWriteTagEPC(0x123a, 0))
+    {
+        ROS_ERROR("[RFID] Write EPC failed (probably no tags found)");
+    }
     ros::spin();
     return 0;
 }
