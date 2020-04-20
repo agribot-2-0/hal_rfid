@@ -9,19 +9,12 @@ project(hal_rfid)
 #############################################################################
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
-  message_generation
+  agribot_msgs
 )
 
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
-add_service_files(
-  FILES
-  Tags.srv
-)
-
-generate_messages(DEPENDENCIES std_msgs)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -47,11 +40,11 @@ include_directories(
 link_directories("${PROJECT_SOURCE_DIR}")
 add_executable(hal_rfid_node src/Rfid.cpp src/RfidMessage.cpp src/rfid_node.cpp)
 target_link_libraries(hal_rfid_node ${catkin_LIBRARIES})
-add_dependencies(hal_rfid_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(hal_rfid_node ${catkin_EXPORTED_TARGETS})
 
 add_executable(example_client src/example_client.cpp)
 target_link_libraries(example_client ${catkin_LIBRARIES})
-add_dependencies(example_client ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(example_client ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

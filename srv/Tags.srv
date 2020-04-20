@@ -1,7 +1,0 @@
-#request constants
-uint8 FRONT=1
-uint8 BACK=2
-#request fields
-uint8 selected_antenna
----
-uint16[] ids

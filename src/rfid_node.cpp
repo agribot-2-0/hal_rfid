@@ -1,6 +1,6 @@
-#include "ros/ros.h"
-#include "hal_rfid/Rfid.h"
-#include "hal_rfid/Tags.h"
+#include <ros/ros.h>
+#include <hal_rfid/Rfid.h>
+#include <agribot_msgs/Tags.h>
 
 #define PORT 4007
 #define RFID_IP "192.168.0.2"
@@ -9,8 +9,8 @@
 
 RFID RfidHandler(RFID_IP, PORT);
 
-bool bScan(hal_rfid::Tags::Request &req,
-           hal_rfid::Tags::Response &res)
+bool bScan(agribot_msgs::Tags::Request &req,
+           agribot_msgs::Tags::Response &res)
 {
     if (req.selected_antenna == req.FRONT)
     {

@@ -1,14 +1,14 @@
 #include <ros/ros.h>
 #include <hal_rfid/Rfid.h>
-#include <hal_rfid/Tags.h>
+#include <agribot_msgs/Tags.h>
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "example_rfid_client");
     ros::NodeHandle n;
     ros::ServiceClient client = 
-        n.serviceClient<hal_rfid::Tags>("hal_rfid/tags");
-    hal_rfid::Tags test2;
+        n.serviceClient<agribot_msgs::Tags>("hal_rfid/tags");
+    agribot_msgs::Tags test2;
     test2.request.selected_antenna = test2.request.BACK;
 
     if(client.call(test2))
