@@ -17,7 +17,7 @@ class RFID
  private:
     int _iSocketFd;
  public:
-    RFID(char* sIpAddr, int iPort);
+    RFID(char* pchIpAddr, int iPort);
     uint8_t u8CalculatePowerVal(float fPV);
     // fPowerValue: 17dBm-33dBm (with 1/4dBm resolution),
     // (default value: 25dBm)

@@ -3,12 +3,20 @@
 #define FRAME_SIZE_BYTE 2
 #define FRAME_ID_BYTE 6
 #define FRAME_DATA_START_BYTE 8
+
+#define EPC_DATA_LEN 4
 #define ID_LEN 2
 
 #define FRAME_START 0x5a50
 #define FRAME_END 0xa5
 
 #define BYTE_MASK 0xff
+
+// Return flags:
+#define RF_NoError 0x00
+#define RF_NoTag 0x0a
+#define RF_NoStandard 0x05
+#define RF_WrongCommandFunctionMode 0x0e
 
 RfidMessage::RfidMessage(uint16_t u16BuffSize)
 {
@@ -144,7 +152,7 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
             {
                 while (true)
                 {
-                    u8MsgIt += 4;
+                    u8MsgIt += EPC_DATA_LEN;
                     if (((_pchBuffer[u8MsgIt-2]&BYTE_MASK) == FRAME_END) ||
                          (u8MsgIt >= _u16BufferSize))
                        {

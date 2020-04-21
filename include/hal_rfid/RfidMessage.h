@@ -16,12 +16,6 @@
 #define RES_SetPortPower 0x8006
 #define RES_SyncWriteEPCToSingleTag 0x810f
 
-// Return flags:
-#define RF_NoError 0x00
-#define RF_NoTag 0x0a
-#define RF_NoStandard 0x05
-#define RF_WrongCommandFunctionMode 0x0e
-
 class RfidMessage
 {
  private:

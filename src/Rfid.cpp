@@ -9,7 +9,7 @@
 
 #define BUFF_SIZE 50
 
-RFID::RFID(char* sIpAddr, int iPort)
+RFID::RFID(char* pchIpAddr, int iPort)
 {
     struct sockaddr_in xServaddr;
     _iSocketFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -20,7 +20,7 @@ RFID::RFID(char* sIpAddr, int iPort)
     }
     bzero(&xServaddr, sizeof(xServaddr));
     xServaddr.sin_family = AF_INET;
-    xServaddr.sin_addr.s_addr = inet_addr(sIpAddr);
+    xServaddr.sin_addr.s_addr = inet_addr(pchIpAddr);
     xServaddr.sin_port = htons(iPort);
     if (connect(_iSocketFd, (struct sockaddr*)&xServaddr,
                 sizeof(xServaddr)) != 0)
