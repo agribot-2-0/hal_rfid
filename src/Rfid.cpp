@@ -9,13 +9,14 @@
 
 #define BUFF_SIZE 50
 
-RFID::RFID(char* pchIpAddr, int iPort)
+RFID::RFID(char* pchIpAddr, int iPort, int8_t *pi8Err)
 {
     struct sockaddr_in xServaddr;
     _iSocketFd = socket(AF_INET, SOCK_STREAM, 0);
+    *pi8Err = 0;
     if (_iSocketFd < 0)
     {
-        std::cerr << "Error while creating TCP socket." << std::endl;
+        *pi8Err = TCP_SOCK_ERROR;
         return;
     }
     bzero(&xServaddr, sizeof(xServaddr));
@@ -25,8 +26,7 @@ RFID::RFID(char* pchIpAddr, int iPort)
     if (connect(_iSocketFd, (struct sockaddr*)&xServaddr,
                 sizeof(xServaddr)) != 0)
     {
-        std::cerr << "Error while connecting to RFID." << std::endl;
-        return;
+        *pi8Err = RFID_CONN_ERROR;
     }
 }
 

@@ -11,7 +11,8 @@
 #define DEFAULT_ANTENAT_PWR 23  // dBm
 #define ANTENNA_POWER_OFF 0
 
-RFID RfidHandler(RFID_IP, PORT);
+int8_t *pi8ErrorCheck(new int8_t(0));
+RFID RfidHandler(RFID_IP, PORT, pi8ErrorCheck);
 
 bool bScan(agribot_msgs::Tags::Request &req,
            agribot_msgs::Tags::Response &res)
@@ -42,11 +43,20 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::ServiceServer Service =
         n.advertiseService("hal_rfid/tags", bScan);
+    if (*pi8ErrorCheck == TCP_SOCK_ERROR ||
+        *pi8ErrorCheck == RFID_CONN_ERROR)
+    {
+        ROS_ERROR("[RFID] Error while creating RFID object: %d",
+                  *pi8ErrorCheck);
+        delete pi8ErrorCheck;
+        return *pi8ErrorCheck;
+    }
     // [Example] Writin new EPC to tag:
     // if(!RfidHandler.bWriteTagEPC(0x123a, 0))
     // {
     //     ROS_ERROR("[RFID] Write EPC failed (probably no tags found)");
     // }
     ros::spin();
+    delete pi8ErrorCheck;
     return 0;
 }

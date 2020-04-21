@@ -11,13 +11,17 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <memory>
+
+#define TCP_SOCK_ERROR -1
+#define RFID_CONN_ERROR -2
 
 class RFID
 {
  private:
     int _iSocketFd;
  public:
-    RFID(char* pchIpAddr, int iPort);
+    RFID(char* pchIpAddr, int iPort, int8_t *pi8Err);
     uint8_t u8CalculatePowerVal(float fPV);
     // fPowerValue: 17dBm-33dBm (with 1/4dBm resolution),
     // (default value: 25dBm)
