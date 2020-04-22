@@ -9,15 +9,18 @@
 
 #define BUFF_SIZE 50
 
-RFID::RFID(char* pchIpAddr, int iPort, int8_t *pi8Err)
+#define DEFAULT_ANTENAT_PWR 23  // dBm
+#define ANTENNA_POWER_OFF 0
+
+RFID::RFID(){}
+
+int8_t RFID::i8Connect(char* pchIpAddr, int iPort)
 {
     struct sockaddr_in xServaddr;
     _iSocketFd = socket(AF_INET, SOCK_STREAM, 0);
-    *pi8Err = 0;
     if (_iSocketFd < 0)
     {
-        *pi8Err = TCP_SOCK_ERROR;
-        return;
+        return TCP_SOCK_ERROR;
     }
     bzero(&xServaddr, sizeof(xServaddr));
     xServaddr.sin_family = AF_INET;
@@ -26,7 +29,7 @@ RFID::RFID(char* pchIpAddr, int iPort, int8_t *pi8Err)
     if (connect(_iSocketFd, (struct sockaddr*)&xServaddr,
                 sizeof(xServaddr)) != 0)
     {
-        *pi8Err = RFID_CONN_ERROR;
+        return RFID_CONN_ERROR;
     }
 }
 
@@ -35,14 +38,54 @@ uint8_t RFID::u8CalculatePowerVal(float fPV)
     uint8_t u8Val = 0;
     if ((fPV <= MAX_POWER_DBM) && (fPV >= MIN_POWER_DBM))
     {
-        u8Val = MIN_POWER_HEX + ((uint8_t)fPV- MIN_POWER_DBM)/RESOLUTION;
+        u8Val = MIN_POWER_HEX + ((uint8_t)fPV - MIN_POWER_DBM)/RESOLUTION;
     }
     return u8Val;
 }
 
+void RFID::vConfigFrontAntenna(uint8_t u8ChosenAntenna, float fPwr)
+{
+    _u8FrontAnt = u8ChosenAntenna;
+    _u8FrontAntPwr = u8CalculatePowerVal(fPwr);
+}
+
+void RFID::vConfigBackAntenna(uint8_t u8ChosenAntenna, float fPwr)
+{
+    _u8BackAnt = u8ChosenAntenna;
+    _u8BackAntPwr = u8CalculatePowerVal(fPwr);
+}
+
+bool RFID::bPrepareForFrontAntennaScan()
+{
+    if((bSetAntennaPower(_u8FrontAnt, DEFAULT_ANTENAT_PWR) != true) ||
+        (bSetAntennaPower(_u8BackAnt, ANTENNA_POWER_OFF) != true))
+    {
+        return false;
+    }
+    return true;
+}
+
+bool RFID::bPrepareForBackAntennaScan()
+{
+    if((bSetAntennaPower(_u8FrontAnt, ANTENNA_POWER_OFF) != true) ||
+        (bSetAntennaPower(_u8BackAnt, DEFAULT_ANTENAT_PWR) != true))
+    {
+        return false;
+    }
+    return true;
+}
+
 bool RFID::bSetAntennaPower(uint8_t u8Port, float fPowerValue)
 {
-    uint8_t u8PowerVal = u8CalculatePowerVal(fPowerValue);
+    uint8_t u8PowerVal = 0;
+    if(u8Port == _u8FrontAnt)
+    {
+        u8PowerVal = _u8FrontAntPwr;
+    }
+    if(u8Port == _u8BackAnt)
+    {
+        u8PowerVal = _u8BackAntPwr;
+    }
     RfidMessage xMsg(BUFF_SIZE);
     uint8_t pu8Data[2] = {u8Port, u8PowerVal};
     xMsg.vMakeRfidFrame(CMD_SetPortPower, pu8Data, 2);

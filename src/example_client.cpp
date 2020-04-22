@@ -1,5 +1,4 @@
 #include <ros/ros.h>
-#include <hal_rfid/Rfid.h>
 #include <agribot_msgs/Tags.h>
 
 int main(int argc, char** argv)
@@ -9,21 +8,21 @@ int main(int argc, char** argv)
     ros::ServiceClient client =
         n.serviceClient<agribot_msgs::Tags>("hal_rfid/tags");
     agribot_msgs::Tags test2;
-    test2.request.selected_antenna = test2.request.BACK;
+    test2.request.selected_antenna = test2.request.FRONT;
 
     if (client.call(test2))
     {
-        std::cout << "Found " << test2.response.ids.size();
-        std::cout << " tags:" << std:: endl;
+        ROS_INFO("[RFID CLIENT] Found %d tags:",
+                 static_cast<int>(test2.response.ids.size()));
         while (!test2.response.ids.empty())
         {
-            std::cout << std::hex << test2.response.ids.back() << std::endl;
+            ROS_INFO("0x%x", test2.response.ids.back());
             test2.response.ids.pop_back();
         }
     }
     else
     {
-        std::cout << "ERROR" << std:: endl;
+        ROS_ERROR("[RFID CLIENT] Error while requesting tags scan");
     }
     return 0;
 }
