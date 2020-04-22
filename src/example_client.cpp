@@ -8,7 +8,7 @@ int main(int argc, char** argv)
     ros::ServiceClient client =
         n.serviceClient<agribot_msgs::Tags>("hal_rfid/tags");
     agribot_msgs::Tags test2;
-    test2.request.selected_antenna = test2.request.FRONT;
+    test2.request.selected_antenna = test2.request.BACK;
 
     if (client.call(test2))
     {

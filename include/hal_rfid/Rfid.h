@@ -20,23 +20,25 @@ class RFID
 {
  private:
    int _iSocketFd;
-   uint8_t _u8FrontAnt;
-   uint8_t _u8BackAnt;
+   uint8_t _u8FrontAntPort;
+   uint8_t _u8BackAntPort;
    uint8_t _u8FrontAntPwr;
    uint8_t _u8BackAntPwr;
  public:
    explicit RFID();
    int8_t i8Connect(char* pchIpAddr, int iPort);
    uint8_t u8CalculatePowerVal(float fPV);
-   void vConfigFrontAntenna(uint8_t u8ChosenAntenna, float fPwr);
-   void vConfigBackAntenna(uint8_t u8ChosenAntenna, float fPwr);
+   bool bConfigFrontAntennaNumber(uint8_t u8ChosenAntenna);
+   bool bConfigBackAntennaNumber(uint8_t u8ChosenAntenna);
+   bool bConfigFrontAntennaPower(float fPwr);
+   bool bConfigBackAntennaPower(float fPwr);
    bool bPrepareForFrontAntennaScan();
    bool bPrepareForBackAntennaScan();
 
    // fPowerValue: 17dBm-33dBm (with 1/4dBm resolution),
    // (default value: 25dBm)
    // Port: 1-4
-   bool bSetAntennaPower(uint8_t u8Port, float fPowerValue);
+   bool bSetAntennaPower(uint8_t u8Port, uint8_t u8PowerValue);
    bool bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password);
    bool bScanForTags(std::vector <std::uint16_t>& vDiscoveredTags);
    ~RFID();

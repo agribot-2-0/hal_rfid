@@ -1,15 +1,16 @@
 #include "hal_rfid/Rfid.h"
 
-// Antenna power set constants:
+// Antenna constants:
 #define MIN_POWER_DBM 17  // dBm
 #define MAX_POWER_DBM 33  // dBm
 #define MIN_POWER_HEX 0x44
 #define MAX_POWER_HEX 0x84
 #define RESOLUTION 0.25
+#define MIN_ANT_PORT 1
+#define MAX_ANT_PORT 4
 
 #define BUFF_SIZE 50
 
-#define DEFAULT_ANTENAT_PWR 23  // dBm
 #define ANTENNA_POWER_OFF 0
 
 RFID::RFID(){}
@@ -35,30 +36,55 @@ int8_t RFID::i8Connect(char* pchIpAddr, int iPort)
 
 uint8_t RFID::u8CalculatePowerVal(float fPV)
 {
-    uint8_t u8Val = 0;
-    if ((fPV <= MAX_POWER_DBM) && (fPV >= MIN_POWER_DBM))
+    return (uint8_t)(MIN_POWER_HEX + ((uint8_t)fPV - MIN_POWER_DBM)/RESOLUTION);
+}
+
+bool RFID::bConfigFrontAntennaNumber(uint8_t u8ChosenAntenna)
+{
+    if ((u8ChosenAntenna <= MAX_ANT_PORT) &&
+    (u8ChosenAntenna >= MIN_ANT_PORT))
     {
-        u8Val = MIN_POWER_HEX + ((uint8_t)fPV - MIN_POWER_DBM)/RESOLUTION;
+        _u8FrontAntPort = u8ChosenAntenna;
+        return true;
     }
-    return u8Val;
+    return false;
 }
 
-void RFID::vConfigFrontAntenna(uint8_t u8ChosenAntenna, float fPwr)
+bool RFID::bConfigBackAntennaNumber(uint8_t u8ChosenAntenna)
 {
-    _u8FrontAnt = u8ChosenAntenna;
-    _u8FrontAntPwr = u8CalculatePowerVal(fPwr);
+    if ((u8ChosenAntenna <= MAX_ANT_PORT) &&
+        (u8ChosenAntenna >= MIN_ANT_PORT))
+    {
+        _u8BackAntPort = u8ChosenAntenna;
+        return true;
+    }
+    return false;
 }
 
-void RFID::vConfigBackAntenna(uint8_t u8ChosenAntenna, float fPwr)
+bool RFID::bConfigFrontAntennaPower(float fPwr)
 {
-    _u8BackAnt = u8ChosenAntenna;
-    _u8BackAntPwr = u8CalculatePowerVal(fPwr);
+    if ((fPwr <= MAX_POWER_DBM) && (fPwr >= MIN_POWER_DBM))
+    {
+        _u8FrontAntPwr = u8CalculatePowerVal(fPwr);
+        return true;
+    }
+    return false;
+}
+
+bool RFID::bConfigBackAntennaPower(float fPwr)
+{
+    if ((fPwr <= MAX_POWER_DBM) && (fPwr >= MIN_POWER_DBM))
+    {
+        _u8BackAntPwr = u8CalculatePowerVal(fPwr);
+        return true;
+    }
+    return false;
 }
 
 bool RFID::bPrepareForFrontAntennaScan()
 {
-    if((bSetAntennaPower(_u8FrontAnt, DEFAULT_ANTENAT_PWR) != true) ||
-        (bSetAntennaPower(_u8BackAnt, ANTENNA_POWER_OFF) != true))
+    if(!bSetAntennaPower(_u8FrontAntPort, _u8FrontAntPwr) ||
+       !bSetAntennaPower(_u8BackAntPort, ANTENNA_POWER_OFF))
     {
         return false;
     }
@@ -67,24 +93,29 @@ bool RFID::bPrepareForFrontAntennaScan()
 
 bool RFID::bPrepareForBackAntennaScan()
 {
-    if((bSetAntennaPower(_u8FrontAnt, ANTENNA_POWER_OFF) != true) ||
-        (bSetAntennaPower(_u8BackAnt, DEFAULT_ANTENAT_PWR) != true))
+    if(!bSetAntennaPower(_u8FrontAntPort, ANTENNA_POWER_OFF) ||
+       !bSetAntennaPower(_u8BackAntPort, _u8BackAntPwr))
     {
         return false;
     }
     return true;
 }
 
-bool RFID::bSetAntennaPower(uint8_t u8Port, float fPowerValue)
+bool RFID::bSetAntennaPower(uint8_t u8Port, uint8_t u8PowerValue)
 {
-    uint8_t u8PowerVal = 0;
-    if(u8Port == _u8FrontAnt)
+    uint8_t u8PowerVal = ANTENNA_POWER_OFF;
+    if(u8PowerValue != ANTENNA_POWER_OFF)
     {
-        u8PowerVal = _u8FrontAntPwr;
-    }
-    if(u8Port == _u8BackAnt)
-    {
-        u8PowerVal = _u8BackAntPwr;
+        if(u8Port == _u8FrontAntPort)
+        {
+            u8PowerVal = _u8FrontAntPwr;
+            std::cout << "Takign front" << std::endl;
+        }
+        if(u8Port == _u8BackAntPort)
+        {
+            u8PowerVal = _u8BackAntPwr;
+            std::cout << "Takign back" << std::endl;
+        }
     }
     RfidMessage xMsg(BUFF_SIZE);
     uint8_t pu8Data[2] = {u8Port, u8PowerVal};

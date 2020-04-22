@@ -5,9 +5,6 @@
 //#define PORT 4007
 //#define RFID_IP "192.168.0.2"
 
-#define MAX_ANT 4
-#define MIN_ANT 1
-
 RFID RfidHandler;
 
 bool bScan(agribot_msgs::Tags::Request &req,
@@ -36,12 +33,12 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "rfid");
     ros::NodeHandle n;
-    if (argc < 5)
+    if (argc < 7)
     {
         ROS_ERROR("[RFID] No arguments specified. Typical node call: \n"
                   "hal_rfid hal_rfid_node [reader_ip] [reader_tcp_port]"
-                  "[front_anntena_number] [front_anntena_pwr]"
-                  "[back_anntena_number] [back_anntena_pwr]");
+                  " [front_anntena_number] [front_anntena_pwr]"
+                  " [back_anntena_number] [back_anntena_pwr]");
         return -1;
     }
 
@@ -54,18 +51,26 @@ int main(int argc, char **argv)
                   i8ErrorCheck);
         return -2;
     }
-    ROS_INFO("[RFID] Connected to %s on port %d", argv[1],
-             atoi(argv[2]));
-    if((atoi(argv[3]) <= MAX_ANT) && (atoi(argv[3]) >= MIN_ANT) &&
-        (atoi(argv[5]) <= MAX_ANT) && (atoi(argv[5]) >= MIN_ANT))
+    if(!RfidHandler.bConfigFrontAntennaNumber(atoi(argv[3])) ||
+       !RfidHandler.bConfigBackAntennaNumber(atoi(argv[5])))
     {
-        RfidHandler.vConfigFrontAntenna(atoi(argv[3]), atof(argv[4]));
-        RfidHandler.vConfigBackAntenna(atoi(argv[4]), atof(argv[5]));
+        ROS_ERROR("[RFID] Allowed antenna port should be chosen from"
+                  " the interval: [1,4]");
+        return -3;
     }
-    else
+    if(!RfidHandler.bConfigFrontAntennaPower(atof(argv[4])) ||
+       !RfidHandler.bConfigBackAntennaPower(atof(argv[6])))
     {
-        ROS_ERROR("[RFID] Allowed antenna number from interval: [1,4]");
+        ROS_ERROR("[RFID] Allowed power should should be chosen from"
+                  " the interval: [17-33] [dBm] (resolution = 0.25)");
+        return -4;
     }
+    ROS_INFO("[RFID] Connected to %s on port %d",
+             argv[1], atoi(argv[2]));
+    ROS_INFO("[RFID] Front antenna config: %d, %f",
+             atoi(argv[3]), atof(argv[4]));
+    ROS_INFO("[RFID] Back antenna config: %d, %f",
+             atoi(argv[5]), atof(argv[6]));
 
     ros::ServiceServer Service =
         n.advertiseService("hal_rfid/tags", bScan);
