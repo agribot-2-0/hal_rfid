@@ -2,8 +2,8 @@
 #include <hal_rfid/Rfid.h>
 #include <agribot_msgs/Tags.h>
 
-//#define PORT 4007
-//#define RFID_IP "192.168.0.2"
+// Default arguments:
+// rosrun hal_rfid hal_rfid_node 192.168.0.2 4007 1 22 2 22
 
 RFID RfidHandler;
 
@@ -12,7 +12,7 @@ bool bScan(agribot_msgs::Tags::Request &req,
 {
     if (req.selected_antenna == req.FRONT)
     {
-        if(!RfidHandler.bPrepareForFrontAntennaScan())
+        if (!RfidHandler.bPrepareForFrontAntennaScan())
         {
             ROS_ERROR("[RFID] Front antenna scan failed");
             return false;
@@ -51,15 +51,15 @@ int main(int argc, char **argv)
                   i8ErrorCheck);
         return -2;
     }
-    if(!RfidHandler.bConfigFrontAntennaNumber(atoi(argv[3])) ||
-       !RfidHandler.bConfigBackAntennaNumber(atoi(argv[5])))
+    if (!RfidHandler.bConfigFrontAntennaNumber(atoi(argv[3])) ||
+        !RfidHandler.bConfigBackAntennaNumber(atoi(argv[5])))
     {
         ROS_ERROR("[RFID] Allowed antenna port should be chosen from"
                   " the interval: [1,4]");
         return -3;
     }
-    if(!RfidHandler.bConfigFrontAntennaPower(atof(argv[4])) ||
-       !RfidHandler.bConfigBackAntennaPower(atof(argv[6])))
+    if (!RfidHandler.bConfigFrontAntennaPower(atof(argv[4])) ||
+        !RfidHandler.bConfigBackAntennaPower(atof(argv[6])))
     {
         ROS_ERROR("[RFID] Allowed power should should be chosen from"
                   " the interval: [17-33] [dBm] (resolution = 0.25)");

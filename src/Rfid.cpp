@@ -13,7 +13,14 @@
 
 #define ANTENNA_POWER_OFF 0
 
-RFID::RFID(){}
+RFID::RFID()
+{
+    _iSocketFd = 0;
+    _u8FrontAntPort = 0;
+    _u8BackAntPort = 0;
+    _u8FrontAntPwr = 0;
+    _u8BackAntPwr = 0;
+}
 
 int8_t RFID::i8Connect(char* pchIpAddr, int iPort)
 {
@@ -83,8 +90,8 @@ bool RFID::bConfigBackAntennaPower(float fPwr)
 
 bool RFID::bPrepareForFrontAntennaScan()
 {
-    if(!bSetAntennaPower(_u8FrontAntPort, _u8FrontAntPwr) ||
-       !bSetAntennaPower(_u8BackAntPort, ANTENNA_POWER_OFF))
+    if (!bSetAntennaPower(_u8FrontAntPort, _u8FrontAntPwr) ||
+        !bSetAntennaPower(_u8BackAntPort, ANTENNA_POWER_OFF))
     {
         return false;
     }
@@ -93,8 +100,8 @@ bool RFID::bPrepareForFrontAntennaScan()
 
 bool RFID::bPrepareForBackAntennaScan()
 {
-    if(!bSetAntennaPower(_u8FrontAntPort, ANTENNA_POWER_OFF) ||
-       !bSetAntennaPower(_u8BackAntPort, _u8BackAntPwr))
+    if (!bSetAntennaPower(_u8FrontAntPort, ANTENNA_POWER_OFF) ||
+        !bSetAntennaPower(_u8BackAntPort, _u8BackAntPwr))
     {
         return false;
     }
@@ -104,17 +111,15 @@ bool RFID::bPrepareForBackAntennaScan()
 bool RFID::bSetAntennaPower(uint8_t u8Port, uint8_t u8PowerValue)
 {
     uint8_t u8PowerVal = ANTENNA_POWER_OFF;
-    if(u8PowerValue != ANTENNA_POWER_OFF)
+    if (u8PowerValue != ANTENNA_POWER_OFF)
     {
-        if(u8Port == _u8FrontAntPort)
+        if (u8Port == _u8FrontAntPort)
         {
             u8PowerVal = _u8FrontAntPwr;
-            std::cout << "Takign front" << std::endl;
         }
-        if(u8Port == _u8BackAntPort)
+        if (u8Port == _u8BackAntPort)
         {
             u8PowerVal = _u8BackAntPwr;
-            std::cout << "Takign back" << std::endl;
         }
     }
     RfidMessage xMsg(BUFF_SIZE);
