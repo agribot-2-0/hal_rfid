@@ -50,6 +50,18 @@ add_dependencies(example_client ${catkin_EXPORTED_TARGETS})
 ## Install ##
 #############
 
+install(TARGETS
+  hal_rfid_node
+  example_client
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+)
+
 #############
 ## Testing ##
 #############
