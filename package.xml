@@ -12,6 +12,8 @@
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>roscpp</exec_depend>
 
+  <build_depend>agribot_msgs</build_depend>
+
   <export>
   </export>
 </package>
