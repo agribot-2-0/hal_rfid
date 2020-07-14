@@ -1,3 +1,7 @@
+/*
+* Copyright (C) 2020 Agribot. All rights reserved.
+*/
+
 #include <ros/ros.h>
 #include <hal_rfid/Rfid.h>
 #include <agribot_msgs/Tags.h>
@@ -7,8 +11,8 @@
 
 RFID RfidHandler;
 
-bool bScan(agribot_msgs::Tags::Request &req,
-           agribot_msgs::Tags::Response &res)
+bool bScan(agribot_msgs::Tags::Request &req,  // NOLINT(runtime/references)
+           agribot_msgs::Tags::Response &res)  // NOLINT(runtime/references)
 {
     if (req.selected_antenna == req.FRONT)
     {
