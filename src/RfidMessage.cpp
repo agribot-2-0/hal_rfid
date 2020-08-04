@@ -164,7 +164,6 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
           (_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_WrongCommandFunctionMode)
       {
         return false;
-        ;
       }
     }
   }
