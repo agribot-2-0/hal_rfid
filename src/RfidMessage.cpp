@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #include <hal_rfid/RfidMessage.h>
 
@@ -24,158 +24,153 @@
 
 RfidMessage::RfidMessage(uint16_t u16BuffSize)
 {
-    _u16BufferSize = u16BuffSize;
-    _pchBuffer = new char[_u16BufferSize];
-    bzero(_pchBuffer, (sizeof(char)*_u16BufferSize));
-    _u16FrameIt = FRAME_DATA_START_BYTE;
+  _u16BufferSize = u16BuffSize;
+  _pchBuffer = new char[_u16BufferSize];
+  bzero(_pchBuffer, (sizeof(char) * _u16BufferSize));
+  _u16FrameIt = FRAME_DATA_START_BYTE;
 }
 
 uint8_t RfidMessage::u8PrintFrame()
 {
-    uint8_t u8FrameSize;
-    for (u8FrameSize = 0; u8FrameSize < 40; u8FrameSize++)
+  uint8_t u8FrameSize;
+  for (u8FrameSize = 0; u8FrameSize < 40; u8FrameSize++)
+  {
+    std::cout << std::hex << (((uint)_pchBuffer[u8FrameSize] & BYTE_MASK));
+    std::cout << std::endl;
+    if ((_pchBuffer[u8FrameSize] & BYTE_MASK) == FRAME_END)
     {
-        std::cout << std::hex << (((uint)_pchBuffer[u8FrameSize]&BYTE_MASK));
-        std::cout << std:: endl;
-        if ((_pchBuffer[u8FrameSize]&BYTE_MASK) == FRAME_END)
-        {
-            break;
-        }
+      break;
     }
-    return u8FrameSize;
+  }
+  return u8FrameSize;
 }
 
 void RfidMessage::vSetFrameStart()
 {
-    _pchBuffer[0] = (FRAME_START&0xff00)>>8;
-    _pchBuffer[1] = (FRAME_START&BYTE_MASK);
+  _pchBuffer[0] = (FRAME_START & 0xff00) >> 8;
+  _pchBuffer[1] = (FRAME_START & BYTE_MASK);
 }
 
 void RfidMessage::vSetFrameLen(uint32_t u32MsgLen)
 {
-    _pchBuffer[2] = (u32MsgLen&0xff);
-    _pchBuffer[3] = (u32MsgLen&0xff00)>>8;
-    _pchBuffer[4] = (u32MsgLen&0xff0000)>>16;
-    _pchBuffer[5] = (u32MsgLen&0xff000000)>>24;
+  _pchBuffer[2] = (u32MsgLen & 0xff);
+  _pchBuffer[3] = (u32MsgLen & 0xff00) >> 8;
+  _pchBuffer[4] = (u32MsgLen & 0xff0000) >> 16;
+  _pchBuffer[5] = (u32MsgLen & 0xff000000) >> 24;
 }
 
 void RfidMessage::vSetFrameId(uint16_t u16Id)
 {
-    _pchBuffer[6] = (u16Id&0xff);
-    _pchBuffer[7] = (u16Id&0xff00)>>8;
+  _pchBuffer[6] = (u16Id & 0xff);
+  _pchBuffer[7] = (u16Id & 0xff00) >> 8;
 }
 
 void RfidMessage::vSetFrameData(uint8_t* pu8Data, uint8_t u8DataLength)
 {
-    for (uint8_t i = 0; i < u8DataLength; i++)
-    {
-        _pchBuffer[_u16FrameIt] = pu8Data[i];
-        _u16FrameIt++;
-    }
+  for (uint8_t i = 0; i < u8DataLength; i++)
+  {
+    _pchBuffer[_u16FrameIt] = pu8Data[i];
+    _u16FrameIt++;
+  }
 }
 
 void RfidMessage::vSetFrameEnd()
 {
-    _pchBuffer[_u16FrameIt] = FRAME_END;
+  _pchBuffer[_u16FrameIt] = FRAME_END;
 }
 
-void RfidMessage::vMakeRfidFrame(uint16_t u16Id, uint8_t* pu8Data,
-                                 uint8_t u8DataLength)
+void RfidMessage::vMakeRfidFrame(uint16_t u16Id, uint8_t* pu8Data, uint8_t u8DataLength)
 {
-    vSetFrameStart();
-    vSetFrameLen(u8DataLength+ID_LEN);
-    vSetFrameId(u16Id);
-    vSetFrameData(pu8Data, u8DataLength);
-    vSetFrameEnd();
+  vSetFrameStart();
+  vSetFrameLen(u8DataLength + ID_LEN);
+  vSetFrameId(u16Id);
+  vSetFrameData(pu8Data, u8DataLength);
+  vSetFrameEnd();
 }
 
 void RfidMessage::vSendFrame(int iSocketFd)
 {
-    write(iSocketFd, _pchBuffer, (sizeof(char)*(_u16FrameIt+1)));
+  write(iSocketFd, _pchBuffer, (sizeof(char) * (_u16FrameIt + 1)));
 }
 
 void RfidMessage::vRecFrame(int iSocketFd)
 {
-    bzero(_pchBuffer, (sizeof(char)*_u16BufferSize));
-    read(iSocketFd, _pchBuffer, (sizeof(char)*_u16BufferSize));
+  bzero(_pchBuffer, (sizeof(char) * _u16BufferSize));
+  read(iSocketFd, _pchBuffer, (sizeof(char) * _u16BufferSize));
 }
 
 uint32_t RfidMessage::u32GetU32(uint8_t u8StartBit, char* pchMsg)
 {
-    return ((uint32_t)pchMsg[u8StartBit+3]) << 24
-    | ((uint32_t)pchMsg[u8StartBit+2])&BYTE_MASK << 16
-    | ((uint32_t)pchMsg[u8StartBit+1])&BYTE_MASK << 8
-    | ((uint32_t)pchMsg[u8StartBit])&BYTE_MASK;
+  return ((uint32_t)pchMsg[u8StartBit + 3]) << 24 | ((uint32_t)pchMsg[u8StartBit + 2]) & BYTE_MASK << 16 |
+         ((uint32_t)pchMsg[u8StartBit + 1]) & BYTE_MASK << 8 | ((uint32_t)pchMsg[u8StartBit]) & BYTE_MASK;
 }
 
 uint16_t RfidMessage::u16GetU16(uint8_t u8StartBit, char* pchMsg)
 {
-    return ((uint16_t)pchMsg[u8StartBit+1]) << 8
-    | ((uint16_t)pchMsg[u8StartBit])&BYTE_MASK;
+  return ((uint16_t)pchMsg[u8StartBit + 1]) << 8 | ((uint16_t)pchMsg[u8StartBit]) & BYTE_MASK;
 }
 
 bool RfidMessage::bCheckSetPowerResp(uint8_t u8Port)
 {
-    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SetPortPower)
+  if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SetPortPower)
+  {
+    if ((_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError) && (_pchBuffer[FRAME_DATA_START_BYTE + 1] == u8Port))
     {
-        if ((_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError) &&
-            (_pchBuffer[FRAME_DATA_START_BYTE+1] == u8Port))
-        {
-            return true;
-        }
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 bool RfidMessage::bCheckWriteEPCResp()
 {
-    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncWriteEPCToSingleTag)
+  if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncWriteEPCToSingleTag)
+  {
+    if (_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError)
     {
-        if (_pchBuffer[FRAME_DATA_START_BYTE] == RF_NoError)
-        {
-            return true;
-        }
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
 {
-    vDiscoveredTags.clear();
-    // Tags EPC frame:
-    if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
+  vDiscoveredTags.clear();
+  // Tags EPC frame:
+  if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
+  {
+    uint8_t u8MsgIt = FRAME_DATA_START_BYTE;
+    while (true)
     {
-        uint8_t u8MsgIt = FRAME_DATA_START_BYTE;
+      if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoTag)
+      {
+        return true;
+      }
+      if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoError)
+      {
         while (true)
         {
-            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoTag)
-            {
-                return true;
-            }
-            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoError)
-            {
-                while (true)
-                {
-                    u8MsgIt += EPC_DATA_LEN;
-                    if (((_pchBuffer[u8MsgIt-2]&BYTE_MASK) == FRAME_END) ||
-                         (u8MsgIt >= _u16BufferSize))
-                       {
-                           break;
-                       }
-                    vDiscoveredTags.push_back(u16GetU16(u8MsgIt, _pchBuffer));
-                }
-                return true;
-            }
-            if ((_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_NoStandard |
-                (_pchBuffer[u8MsgIt]&BYTE_MASK) == RF_WrongCommandFunctionMode)
-            {
-                return false;;
-            }
+          u8MsgIt += EPC_DATA_LEN;
+          if (((_pchBuffer[u8MsgIt - 2] & BYTE_MASK) == FRAME_END) || (u8MsgIt >= _u16BufferSize))
+          {
+            break;
+          }
+          vDiscoveredTags.push_back(u16GetU16(u8MsgIt, _pchBuffer));
         }
+        return true;
+      }
+      if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoStandard |
+          (_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_WrongCommandFunctionMode)
+      {
+        return false;
+        ;
+      }
     }
+  }
 }
 
 RfidMessage::~RfidMessage()
 {
-    delete[] _pchBuffer;
+  delete[] _pchBuffer;
 }
