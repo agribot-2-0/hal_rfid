@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <hal_rfid/Rfid.h>
 #include <agribot_msgs/Tags.h>
+#include <agribot_msgs/RfidPower.h>
 
 // Default arguments:
 // rosrun hal_rfid hal_rfid_node 192.168.0.2 4007 1 22 2 22
@@ -31,6 +32,32 @@ bool bScan(agribot_msgs::Tags::Request &req,  // NOLINT(runtime/references)
         }
     }
     return RfidHandler.bScanForTags(res.ids);
+}
+
+bool bSetPower(agribot_msgs::RfidPower::Request &req,  // NOLINT(runtime/references)
+               agribot_msgs::RfidPower::Response &res)  // NOLINT(runtime/references)
+{
+    res.result = res.SUCCESS;
+    switch (req.selected_antenna)
+    {
+        case req.FRONT:
+            if (!RfidHandler.bConfigFrontAntennaPower(req.power_value))
+            {
+                res.result = res.FAIL;
+                return false;
+            }        
+            break;
+        case req.BACK:
+            if (!RfidHandler.bConfigBackAntennaPower(req.power_value))
+            {
+                res.result = res.FAIL;
+                return false;
+            }
+            break;
+        default:
+            res.result = res.FAIL;
+    }
+    return true;
 }
 
 int main(int argc, char **argv)
@@ -76,8 +103,11 @@ int main(int argc, char **argv)
     ROS_INFO("[RFID] Back antenna config: %d, %f",
              atoi(argv[5]), atof(argv[6]));
 
-    ros::ServiceServer Service =
-        n.advertiseService("hal_rfid/tags", bScan);
+    ros::ServiceServer ServiceTags =
+        n.advertiseService("agribot/rfid/tags", bScan);
+    ros::ServiceServer ServiceAntennas =
+        n.advertiseService("agribot/rfid/antennas", bSetPower);
+    
     // [Example] Writin new EPC to tag:
     // if(!RfidHandler.bWriteTagEPC(0x123a, 0))
     // {
