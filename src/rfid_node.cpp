@@ -97,7 +97,7 @@ int main(int argc, char** argv)
   ROS_INFO("[RFID] Back antenna config: %d, %f", atoi(argv[5]), atof(argv[6]));
 
   ros::ServiceServer ServiceTags = n.advertiseService("agribot/rfid/tags", bScan);
-  ros::ServiceServer ServiceAntennas = n.advertiseService("agribot/rfid/antennas", bSetPower);
+  ros::ServiceServer ServiceAntennas = n.advertiseService("agribot/rfid/antennas/power", bSetPower);
 
   // [Example] Writin new EPC to tag:
   // if(!RfidHandler.bWriteTagEPC(0x123a, 0))
