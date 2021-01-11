@@ -146,17 +146,21 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDisc
     {
       if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoTag)
       {
+        std::cout << "notags" << std::endl;
         return true;
       }
       if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoError)
       {
+        std::cout << "noerror" << std::endl;
         u8MsgIt += 3;
         while (true)
         {
+          std::cout << "while1" << std::endl;
           u8EpcWordsCnt = _pchBuffer[u8MsgIt];
           u8MsgIt++;
-          for (std::size_t i; i < u8EpcWordsCnt*2; ++i)
+          for (std::size_t i = 0; i < u8EpcWordsCnt*2; ++i)
           {
+            std::cout << " it: " << std::hex <<  u8MsgIt << " epc: " << _pchBuffer[u8MsgIt];
             vEpc.push_back(_pchBuffer[u8MsgIt]);
             u8MsgIt++;
           }

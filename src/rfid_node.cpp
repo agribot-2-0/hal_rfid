@@ -56,7 +56,7 @@ bool bScan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
   }
   castMsgVectorToStdVec(res.ids, ids);
   ret = RfidHandler.bScanForTags(ids);
-  castStdVecToMsgVector(res.ids, ids)
+  castStdVecToMsgVector(res.ids, ids);
   return ret;
 }
 
