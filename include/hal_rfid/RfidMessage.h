@@ -42,7 +42,7 @@ class RfidMessage
     uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
     bool bCheckSetPowerResp(uint8_t u8Port);
     bool bCheckWriteEPCResp();
-    bool bCheckGetEPCResp(std::vector<std::uint16_t>&
-            vDiscoveredTags);  // NOLINT(runtime/references)
+    bool bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& 
+                          vDiscoveredTags);  // NOLINT(runtime/references)
     ~RfidMessage();
 };
