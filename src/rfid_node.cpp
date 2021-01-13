@@ -13,20 +13,22 @@
 
 RFID RfidHandler;
 
-void castMsgVectorToStdVec(std::vector<agribot_msgs::Tag>& msg_vec, std::vector<std::vector<uint8_t>>& std_vec)
+void castMsgVectorToStdVec(std::vector<agribot_msgs::Tag>& msg_vec,     // NOLINT(runtime/references)
+                           std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
 {
   std_vec.clear();
-  for(agribot_msgs::Tag id : msg_vec)
+  for (agribot_msgs::Tag id : msg_vec)
   {
     std_vec.push_back(std::vector<uint8_t>(id.epc.begin(), id.epc.end()));
   }
 }
 
-void castStdVecToMsgVector(std::vector<agribot_msgs::Tag>& msg_vec, std::vector<std::vector<uint8_t>>& std_vec)
+void castStdVecToMsgVector(std::vector<agribot_msgs::Tag>& msg_vec,     // NOLINT(runtime/references)
+                           std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
 {
   msg_vec.clear();
   agribot_msgs::Tag tmp;
-  for(std::vector<uint8_t> id : std_vec)
+  for (std::vector<uint8_t> id : std_vec)
   {
     tmp.epc = std::vector<uint8_t>(id.begin(), id.end());
     msg_vec.push_back(tmp);

@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2020 Agribot. All rights reserved.
-*/
+ * Copyright (C) 2020 Agribot. All rights reserved.
+ */
 
 #pragma once
 
@@ -23,26 +23,27 @@
 class RfidMessage
 {
  private:
-    char* _pchBuffer;
-    uint16_t _u16FrameIt;
-    uint16_t _u16BufferSize;
+  char* _pchBuffer;
+  uint16_t _u16FrameIt;
+  uint16_t _u16BufferSize;
+
  public:
-    explicit RfidMessage(uint16_t u16FrameSize);
-    uint8_t u8PrintFrame();
-    void vSetFrameStart();
-    // u32MsgSize - In bytes (id size + data size)
-    void vSetFrameLen(uint32_t u32MsgSize);
-    void vSetFrameId(uint16_t u16Id);
-    void vSetFrameData(uint8_t* pu8Data, uint8_t u8DataLength);
-    void vSetFrameEnd();
-    void vMakeRfidFrame(uint16_t u16Id, uint8_t* pu8Data, uint8_t u8DataLength);
-    void vSendFrame(int iSocketFd);
-    void vRecFrame(int iSocketFd);
-    uint32_t u32GetU32(uint8_t u8StartBit, char* pchMsg);
-    uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
-    bool bCheckSetPowerResp(uint8_t u8Port);
-    bool bCheckWriteEPCResp();
-    bool bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& 
-                          vDiscoveredTags);  // NOLINT(runtime/references)
-    ~RfidMessage();
+  explicit RfidMessage(uint16_t u16FrameSize);
+  uint8_t u8PrintFrame();
+  void vSetFrameStart();
+  // u32MsgSize - In bytes (id size + data size)
+  void vSetFrameLen(uint32_t u32MsgSize);
+  void vSetFrameId(uint16_t u16Id);
+  void vSetFrameData(uint8_t* pu8Data, uint8_t u8DataLength);
+  void vSetFrameEnd();
+  void vMakeRfidFrame(uint16_t u16Id, uint8_t* pu8Data, uint8_t u8DataLength);
+  void vSendFrame(int iSocketFd);
+  void vRecFrame(int iSocketFd);
+  uint32_t u32GetU32(uint8_t u8StartBit, char* pchMsg);
+  uint16_t u16GetU16(uint8_t u8StartBit, char* pchMsg);
+  bool bCheckSetPowerResp(uint8_t u8Port);
+  bool bCheckWriteEPCResp();
+  bool bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>&  // NOLINT(runtime/references)
+                            vDiscoveredTags);                    // NOLINT(runtime/references)
+  ~RfidMessage();
 };
