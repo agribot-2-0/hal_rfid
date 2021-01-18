@@ -13,8 +13,8 @@
 
 RFID RfidHandler;
 
-void castMsgVectorToStdVec(std::vector<agribot_msgs::Tag>& msg_vec,     // NOLINT(runtime/references)
-                           std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
+void castMsgVectorToStdVec(const std::vector<agribot_msgs::Tag>& msg_vec,  // NOLINT(runtime/references)
+                           std::vector<std::vector<uint8_t>>& std_vec)     // NOLINT(runtime/references)
 {
   std_vec.clear();
   for (agribot_msgs::Tag id : msg_vec)
@@ -23,14 +23,14 @@ void castMsgVectorToStdVec(std::vector<agribot_msgs::Tag>& msg_vec,     // NOLIN
   }
 }
 
-void castStdVecToMsgVector(std::vector<agribot_msgs::Tag>& msg_vec,     // NOLINT(runtime/references)
-                           std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
+void castStdVecToMsgVector(std::vector<agribot_msgs::Tag>& msg_vec,           // NOLINT(runtime/references)
+                           const std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
 {
   msg_vec.clear();
   agribot_msgs::Tag tmp;
   for (std::vector<uint8_t> id : std_vec)
   {
-    tmp.epc = std::vector<uint8_t>(id.begin(), id.end());
+    tmp.epc = std::vector<uint8_t>(id);
     msg_vec.push_back(tmp);
   }
 }

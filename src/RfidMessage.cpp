@@ -136,7 +136,7 @@ bool RfidMessage::bCheckWriteEPCResp()
 
 bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDiscoveredTags)
 {
-  std::size_t u8EpcWordsCnt = 0;
+  std::size_t EpcWordsCnt = 0;
   std::vector<uint8_t> vEpc;
   vDiscoveredTags.clear();
   // Tags EPC frame:
@@ -154,9 +154,9 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDisc
         u8MsgIt += PROCEED_TO_BEGIN_OF_EPC;
         while (true)
         {
-          u8EpcWordsCnt = _pchBuffer[u8MsgIt];
+          EpcWordsCnt = _pchBuffer[u8MsgIt];
           u8MsgIt++;
-          for (std::size_t i = 0; i < u8EpcWordsCnt*2; ++i)
+          for (std::size_t i = 0; i < EpcWordsCnt*2; ++i)
           {
             vEpc.push_back(_pchBuffer[u8MsgIt]);
             u8MsgIt++;
