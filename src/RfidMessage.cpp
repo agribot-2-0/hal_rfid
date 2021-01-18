@@ -9,7 +9,7 @@
 #define FRAME_DATA_START_BYTE 8
 
 #define ID_LEN 2
-#define PROCEED_TO_BEGIN_OF_EPC 3
+#define PROCEED_TO_BEGIN_OF_EPC 2
 
 #define FRAME_START 0x5a50
 #define FRAME_END 0xa5
@@ -152,8 +152,10 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDisc
       if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoError)
       {
         u8MsgIt += PROCEED_TO_BEGIN_OF_EPC;
-        while (true)
+        while (((_pchBuffer[u8MsgIt] & BYTE_MASK) != FRAME_END) &&
+               (u8MsgIt < _u16BufferSize))
         {
+          u8MsgIt++;
           EpcWordsCnt = _pchBuffer[u8MsgIt];
           u8MsgIt++;
           for (std::size_t i = 0; i < EpcWordsCnt*2; ++i)
@@ -163,11 +165,6 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDisc
           }
           vDiscoveredTags.push_back(vEpc);
           vEpc.clear();
-          if (((_pchBuffer[u8MsgIt] & BYTE_MASK) == FRAME_END) || (u8MsgIt >= _u16BufferSize))
-          {
-            break;
-          }
-          u8MsgIt++;
         }
         return true;
       }
