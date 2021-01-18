@@ -23,8 +23,8 @@ void castMsgVectorToStdVec(const std::vector<agribot_msgs::Tag>& msg_vec,  // NO
   }
 }
 
-void castStdVecToMsgVector(std::vector<agribot_msgs::Tag>& msg_vec,           // NOLINT(runtime/references)
-                           const std::vector<std::vector<uint8_t>>& std_vec)  // NOLINT(runtime/references)
+void castStdVecToMsgVector(const std::vector<std::vector<uint8_t>>& std_vec,  // NOLINT(runtime/references)
+                           std::vector<agribot_msgs::Tag>& msg_vec)           // NOLINT(runtime/references)
 {
   msg_vec.clear();
   agribot_msgs::Tag tmp;
@@ -58,7 +58,7 @@ bool bScan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
   }
   castMsgVectorToStdVec(res.ids, ids);
   ret = RfidHandler.bScanForTags(ids);
-  castStdVecToMsgVector(res.ids, ids);
+  castStdVecToMsgVector(ids, res.ids);
   return ret;
 }
 
