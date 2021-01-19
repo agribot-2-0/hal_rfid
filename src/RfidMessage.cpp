@@ -8,8 +8,8 @@
 #define FRAME_ID_BYTE 6
 #define FRAME_DATA_START_BYTE 8
 
-#define EPC_DATA_LEN 4
 #define ID_LEN 2
+#define PROCEED_TO_BEGIN_OF_EPC 2
 
 #define FRAME_START 0x5a50
 #define FRAME_END 0xa5
@@ -134,8 +134,10 @@ bool RfidMessage::bCheckWriteEPCResp()
   return false;
 }
 
-bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
+bool RfidMessage::bCheckGetEPCResp(std::vector<std::vector<std::uint8_t>>& vDiscoveredTags)
 {
+  std::size_t EpcWordsCnt = 0;
+  std::vector<uint8_t> vEpc;
   vDiscoveredTags.clear();
   // Tags EPC frame:
   if (u16GetU16(FRAME_ID_BYTE, _pchBuffer) == RES_SyncGetEPCs)
@@ -149,14 +151,20 @@ bool RfidMessage::bCheckGetEPCResp(std::vector<std::uint16_t>& vDiscoveredTags)
       }
       if ((_pchBuffer[u8MsgIt] & BYTE_MASK) == RF_NoError)
       {
-        while (true)
+        u8MsgIt += PROCEED_TO_BEGIN_OF_EPC;
+        while (((_pchBuffer[u8MsgIt] & BYTE_MASK) != FRAME_END) &&
+               (u8MsgIt < _u16BufferSize))
         {
-          u8MsgIt += EPC_DATA_LEN;
-          if (((_pchBuffer[u8MsgIt - 2] & BYTE_MASK) == FRAME_END) || (u8MsgIt >= _u16BufferSize))
+          u8MsgIt++;
+          EpcWordsCnt = _pchBuffer[u8MsgIt];
+          u8MsgIt++;
+          for (std::size_t i = 0; i < EpcWordsCnt*2; ++i)
           {
-            break;
+            vEpc.push_back(_pchBuffer[u8MsgIt]);
+            u8MsgIt++;
           }
-          vDiscoveredTags.push_back(u16GetU16(u8MsgIt, _pchBuffer));
+          vDiscoveredTags.push_back(vEpc);
+          vEpc.clear();
         }
         return true;
       }

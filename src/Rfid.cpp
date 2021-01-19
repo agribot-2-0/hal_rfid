@@ -13,7 +13,7 @@
 #define MIN_ANT_PORT 1
 #define MAX_ANT_PORT 4
 
-#define BUFF_SIZE 50
+#define BUFF_SIZE 100
 
 #define ANTENNA_POWER_OFF 0
 
@@ -149,7 +149,7 @@ bool RFID::bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password)
   return xMsg.bCheckWriteEPCResp();
 }
 
-bool RFID::bScanForTags(std::vector<std::uint16_t>& vDiscoveredTags)
+bool RFID::bScanForTags(std::vector<std::vector<std::uint8_t>>& vDiscoveredTags)
 {
   RfidMessage xMsg(BUFF_SIZE);
   uint8_t pu8Data[0];

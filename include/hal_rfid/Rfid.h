@@ -44,6 +44,6 @@ class RFID
   // Port: 1-4
   bool bSetAntennaPower(uint8_t u8Port, uint8_t u8PowerValue);
   bool bWriteTagEPC(uint16_t u16NewEPC, uint32_t u32Password);
-  bool bScanForTags(std::vector <std::uint16_t>& vDiscoveredTags);  // NOLINT(runtime/references)
+  bool bScanForTags(std::vector<std::vector<std::uint8_t>>& vDiscoveredTags);  // NOLINT(runtime/references)
   ~RFID();
 };

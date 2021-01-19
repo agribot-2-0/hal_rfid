@@ -4,6 +4,7 @@
 
 #include <ros/ros.h>
 #include <hal_rfid/Rfid.h>
+#include <agribot_msgs/Tag.h>
 #include <agribot_msgs/Tags.h>
 #include <agribot_msgs/RfidPower.h>
 
@@ -12,15 +13,39 @@
 
 RFID RfidHandler;
 
+void castMsgVectorToStdVec(const std::vector<agribot_msgs::Tag>& msg_vec,  // NOLINT(runtime/references)
+                           std::vector<std::vector<uint8_t>>& std_vec)     // NOLINT(runtime/references)
+{
+  std_vec.clear();
+  for (agribot_msgs::Tag id : msg_vec)
+  {
+    std_vec.push_back(std::vector<uint8_t>(id.epc.begin(), id.epc.end()));
+  }
+}
+
+void castStdVecToMsgVector(const std::vector<std::vector<uint8_t>>& std_vec,  // NOLINT(runtime/references)
+                           std::vector<agribot_msgs::Tag>& msg_vec)           // NOLINT(runtime/references)
+{
+  msg_vec.clear();
+  agribot_msgs::Tag tmp;
+  for (std::vector<uint8_t> id : std_vec)
+  {
+    tmp.epc = std::vector<uint8_t>(id);
+    msg_vec.push_back(tmp);
+  }
+}
+
 bool bScan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
            agribot_msgs::Tags::Response& res)  // NOLINT(runtime/references)
 {
+  std::vector<std::vector<uint8_t>> ids;
+  bool ret = false;
   if (req.selected_antenna == req.FRONT)
   {
     if (!RfidHandler.bPrepareForFrontAntennaScan())
     {
       ROS_ERROR("[RFID] Front antenna scan failed");
-      return false;
+      return ret;
     }
   }
   if (req.selected_antenna == req.BACK)
@@ -28,10 +53,13 @@ bool bScan(agribot_msgs::Tags::Request& req,   // NOLINT(runtime/references)
     if (!RfidHandler.bPrepareForBackAntennaScan())
     {
       ROS_ERROR("[RFID] Back antenna scan failed");
-      return false;
+      return ret;
     }
   }
-  return RfidHandler.bScanForTags(res.ids);
+  castMsgVectorToStdVec(res.ids, ids);
+  ret = RfidHandler.bScanForTags(ids);
+  castStdVecToMsgVector(ids, res.ids);
+  return ret;
 }
 
 bool bSetPower(agribot_msgs::RfidPower::Request& req,   // NOLINT(runtime/references)
